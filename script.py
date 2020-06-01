@@ -1,14 +1,30 @@
 import os
 import docx
 import boto3
+from time import sleep
 
-def readtxt(file):
+def readText(file):
 	doc = docx.Document(file)
 	fullText = ''
 	for paragraph in doc.paragraphs:
 		fullText += paragraph.text
 		fullText += '\n\n'
-	return fullText; 
+	return fullText
+
+def cutText(text):
+	segments = ['']
+	index = 0
+	charNumber = 0 
+	for char in text:
+		if charNumber < 2500:
+			segments[index] += char
+		else:
+			segments.append(char)
+			index += 1
+			charNumber = 1
+		charNumber += 1
+	return segments
+
 
 def translateText(text):
 
@@ -26,5 +42,17 @@ def createDocx(text):
 	doc.save('file.docx')
 
 
-createDocx(translateText(readtxt('Input/file.docx')))
+def main():
+	text = readText('Input/file.docx')
+	segments = cutText(text)
+	translatedText = ''
+	for number, segment in enumerate(segments):
+		translatedText += translateText(segment)
+		sleep(20)
+		print(str(number + 1) + '/' + str(len(segments)))
+	createDocx(translatedText)
+	print("Done")
+
+main()
+#createDocx(translateText(readtxt('Input/file.docx')))
 
